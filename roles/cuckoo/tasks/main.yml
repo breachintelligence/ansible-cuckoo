@@ -158,11 +158,6 @@
   become_method: sudo
   template: src=virtualbox.conf.j2 dest=/home/cuckoo/cuckoo-{{ cuckoo_version }}/conf/virtualbox.conf owner=cuckoo group=cuckoo mode=0644
 
-- name: Copy cuckoo start script to /usr/local/bin
-  become: yes
-  become_method: sudo
-  copy: src=cuckoo dest=/usr/local/bin/ owner=root group=root mode=0755
-
 #kvm support (move to kvm role and run prior to cuckoo role)
 #apt-get install -y qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils python-libvirt
 #when: vmtype == "kvm"
