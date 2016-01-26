@@ -1,0 +1,23 @@
+[virtualbox]
+mode = headless
+path = /usr/bin/VBoxManage
+interface = vboxnet0
+
+machines = winxp
+
+[winxp]
+label = winxp
+platform = windows
+ip = 192.168.57.101
+snapshot = vmcloak
+interface = vboxnet0
+resultserver_ip = 192.168.57.1
+resultserver_port = 2042
+# tags = windows_xp_sp3,32_bit,acrobat_reader_6
+
+[honeyd]
+label = honeyd
+platform = linux
+ip = 192.168.56.102
+tags = service, honeyd
+options = nictrace noagent

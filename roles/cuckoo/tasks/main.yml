@@ -1,0 +1,251 @@
+---
+
+- name: Install requirements from apt
+  become: yes
+  become_method: sudo
+  apt: pkg={{ item }} state=latest
+  with_items: apt_requirements
+
+- name: Create cuckoo group
+  become: yes
+  become_method: sudo
+  group: name=cuckoo
+
+- name: Create cuckoo user
+  become: yes
+  become_method: sudo
+  user: name=cuckoo groups=cuckoo,vboxusers,sudo shell=/bin/bash password=$6$fd3Ei22cWadFLS1U$uFxUvp24bSDfITbXP5EeSav4KmB.xHAxypwtIdmvb3A.2anQfsRFHmgNagINMMJmyE29FWvcvq7fgsUByJIoK/
+
+- name: Sudo group with no passwd
+  become: yes
+  become_method: sudo
+  lineinfile: "dest=/etc/sudoers state=present regexp='^%sudo' line='%sudo ALL=(ALL) NOPASSWD: ALL'"
+  
+- name: Download cuckoo
+  become: yes
+  become_method: sudo
+  get_url: url=https://github.com/cuckoosandbox/cuckoo/archive/{{ cuckoo_version }}.tar.gz dest=/tmp mode=0440
+
+- name: Extract cuckoo
+  become: yes
+  become_method: sudo
+  unarchive: src="/tmp/cuckoo-{{ cuckoo_version }}.tar.gz" dest=/home/cuckoo copy=no
+
+- name: Install requirements from pip
+  become: yes
+  become_method: sudo
+  pip: requirements=/home/cuckoo/cuckoo-{{ cuckoo_version }}/requirements.txt
+
+#- name: Install additional python modules
+#  pip: name={{ item }} state=present
+#  with_items: pip_requirements
+#  become: yes
+#  become_method: sudo
+
+- name: Setcap tcptump permissions
+  become: yes
+  become_method: sudo
+  command: setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+
+- name: Install yara requirements from apt
+  become: yes
+  become_method: sudo
+  apt: pkg={{ item }} state=latest
+  with_items: yara_apt_requirements
+
+- name: Download yara
+  become: yes
+  become_method: sudo
+  get_url: url=https://github.com/plusvic/yara/archive/v{{ yara_version }}.tar.gz dest=/tmp/ mode=0440
+
+- name: Extract yara
+  become: yes
+  become_method: sudo
+  unarchive: src="/tmp/yara-{{ yara_version }}.tar.gz" dest=/tmp copy=no
+
+- name: yara Bootstrap
+  become: yes
+  become_method: sudo
+  command: ./bootstrap.sh
+  args:
+    chdir: /tmp/yara-{{ yara_version }}
+
+- name: yara Configure
+  become: yes
+  become_method: sudo
+  command: ./configure --enable-cuckoo --enable-magic
+  args:
+    chdir: /tmp/yara-{{ yara_version }}
+
+- name: yara Make install
+  become: yes
+  become_method: sudo
+  command: make install
+  args:
+    chdir: /tmp/yara-{{ yara_version }}
+
+- name: Build yara python module
+  become: yes
+  become_method: sudo
+  command: python setup.py build install
+  args:
+    chdir: /tmp/yara-{{ yara_version }}/yara-python
+
+- name: yara ldconfig
+  become: yes
+  become_method: sudo
+  command: ldconfig
+  args:
+    chdir: /tmp/yara-{{ yara_version }}/yara-python
+
+#- name: Cleanup yara installation files
+#  become: yes
+#  become_method: sudo
+#  file: path=/tmp/{{ item }} state=absent
+#  with_items:
+#    - /tmp/yara-{{ yara_version }}
+#    - /tmp/yara-{{ yara_version }}.tar.gz
+
+- name: download volatility
+  become: yes
+  become_method: sudo
+  get_url: url=https://github.com/volatilityfoundation/volatility/archive/{{ volatility_version }}.tar.gz  dest=/tmp/ mode=0440
+
+- name: Extract volatility
+  become: yes
+  become_method: sudo
+  unarchive: src="/tmp/volatility-{{ volatility_version }}.tar.gz" dest=/tmp copy=no
+
+- name: Install volatility
+  become: yes
+  become_method: sudo
+  command: python setup.py install
+  args:
+    chdir: /tmp/volatility-{{ volatility_version }}
+
+#- name: Cleanup volatility installation files
+#  become: yes
+#  become_method: sudo
+#  command: rm -rf /tmp/volatility-{{ volatility_version }} && rm -rf /tmp/volatility-{{ volatility_version }}.tar.gz
+
+- name: Give proper permissions
+  become: yes
+  become_method: sudo
+  file: path="/home/cuckoo/cuckoo-{{ cuckoo_version }}" state=directory recurse=yes owner=cuckoo group=cuckoo
+
+- name: Update cuckoo.conf
+  become: yes
+  become_method: sudo
+  template: src=cuckoo.conf.j2 dest=/home/cuckoo/cuckoo-{{ cuckoo_version }}/conf/cuckoo.conf owner=cuckoo group=cuckoo mode=0644
+
+- name: Update memory.conf
+  become: yes
+  become_method: sudo
+  template: src=memory.conf.j2 dest=/home/cuckoo/cuckoo-{{ cuckoo_version }}/conf/memory.conf owner=cuckoo group=cuckoo mode=0644
+
+- name: Update processing.conf
+  become: yes
+  become_method: sudo
+  template: src=processing.conf.j2 dest=/home/cuckoo/cuckoo-{{ cuckoo_version }}/conf/processing.conf owner=cuckoo group=cuckoo mode=0644
+
+- name: Update reporting.conf
+  become: yes
+  become_method: sudo
+  template: src=reporting.conf.j2 dest=/home/cuckoo/cuckoo-{{ cuckoo_version }}/conf/reporting.conf owner=cuckoo group=cuckoo mode=0644
+
+- name: Update virtualbox.conf
+  become: yes
+  become_method: sudo
+  template: src=virtualbox.conf.j2 dest=/home/cuckoo/cuckoo-{{ cuckoo_version }}/conf/virtualbox.conf owner=cuckoo group=cuckoo mode=0644
+
+- name: Copy cuckoo start script to /usr/local/bin
+  become: yes
+  become_method: sudo
+  copy: src=cuckoo dest=/usr/local/bin/ owner=root group=root mode=0755
+
+#kvm support (move to kvm role and run prior to cuckoo role)
+#apt-get install -y qemu-kvm libvirt-bin ubuntu-vm-builder bridge-utils python-libvirt
+#when: vmtype == "kvm"
+
+- name: Add nginx apt key
+  become: yes
+  become_method: sudo
+  apt_key:
+    url='http://nginx.org/keys/nginx_signing.key'
+  
+- name: Add nginx apt repo
+  become: yes
+  become_method: sudo
+  apt_repository:
+    repo="deb http://nginx.org/packages/{{ ansible_lsb.id|lower }}/ {{ ansible_lsb.codename }} nginx"
+    update_cache=yes
+  
+- name: Install Nginx apt package
+  become: yes
+  become_method: sudo
+  apt: pkg=nginx state=latest
+
+- name: Install Supervisor
+  become: yes
+  become_method: sudo
+  apt: pkg=supervisor state=latest
+
+- name: Disable default servers
+  become: yes
+  become_method: sudo
+  file:
+    path=/etc/nginx/conf.d/{{ item.path }}
+    state=absent
+  with_items:
+    - { path: 'default.conf' }
+    - { path: 'example_ssl.conf' }
+
+- name: Install uWSGI apt package
+  become: yes
+  become_method: sudo
+  apt: pkg=uwsgi state=latest
+
+- name: Install Cuckoo Sandbox API uWSGI configuration
+  become: yes
+  become_method: sudo
+  template: src=cuckoo-api.ini.j2 dest=/etc/uwsgi/apps-available/cuckoo-api.ini owner=root group=root mode=0644
+
+# create symlink between /etc/uwsgi/apps-available/cuckoo-api.ini and /etc/uwsgi/apps-enabled/cuckoo-api.ini
+
+- name: Install Cuckoo Sandbox Web Service
+  become: yes
+  become_method: sudo
+  template: src=service.cuckoo-web.conf.j2 dest=/etc/init/cuckoo-web.conf owner=root group=root mode=0644
+
+- name: Install Cuckoo Sandbox Service
+  become: yes
+  become_method: sudo
+  template: src=service.cuckoo.conf.j2 dest=/etc/init/cuckoo.conf owner=root group=root mode=0644
+
+- name: Install Cuckoo Sandbox API NGINX Configuration
+  become: yes
+  become_method: sudo
+  template: src=nginx.cuckoo-api.conf.j2 dest=/etc/nginx/conf.d/cuckoo-api.conf owner=root group=root mode=0644
+
+- name: Install Cuckoo Sandbox Web NGINX Configuration
+  become: yes
+  become_method: sudo
+  template: src=nginx.cuckoo-web.conf.j2 dest=/etc/nginx/conf.d/cuckoo-web.conf owner=root group=root mode=0644
+  notify: restart nginx
+
+- name: Enable Cuckoo Sandbox service
+  become: yes
+  become_method: sudo
+  service: name=cuckoo enabled=yes state=restarted
+
+- name: Enable Cuckoo-Web Sandbox service
+  become: yes
+  become_method: sudo
+  service: name=cuckoo-web enabled=yes state=restarted
+
+# start/enable cuckoo-api?
+
+- name: Enable Nginx service
+  become: yes
+  become_method: sudo
+  service: name=nginx enabled=yes state=restarted

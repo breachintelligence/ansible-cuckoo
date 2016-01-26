@@ -1,0 +1,78 @@
+---
+cuckoo_version: "2.0-rc1"
+apt_requirements:
+  - python
+  - python-pip
+  - python-dev
+  - libffi-dev
+  - libssl-dev
+  - wget
+  - mongodb
+  - build-essential
+
+# apt_requirements_from_ezetze:
+  # - python
+  # - python-pip
+  # - python-dev
+  # - libffi-dev
+  # - libssl-dev
+  # - git 
+  # - curl
+  # - python-django
+  # - libxml2-dev
+  # - libxslt1-dev
+  # - libpq-dev
+  # - libfuzzy-dev
+  # - tcpdump
+  # - libcap2-bin
+  # - wget
+  # - dnsmasq
+  # - python
+  # - mongodb
+  # - python-bson
+  # - libmagic-dev
+  # - build-essential
+  # - libreadline-gplv2-dev
+  # - libjpeg8-dev
+  # - zlib1g
+  # - zlib1g-dev 
+  # - libgdbm-dev
+  # - libc6-dev
+  # - libbz2-dev
+  # - libfreetype6-dev
+  # - libtool
+  # - automake 
+  # - libjansson-dev
+  # - libfuzzy-dev
+  # - python-magic
+  # - python-gridfs
+  # - python-libvirt
+  # - supervisor
+  # - genisoimage
+  # - python-apt
+  # - gcc
+
+pip_requirements: 
+  - django-ratelimit
+  - dnspython
+  - bottle
+  - pydeep
+  - pygal
+  - vmcloak
+  - distorm3
+  - gunicorn
+
+yara_version: "3.3.0"
+yara_apt_requirements:
+  - libpcre3
+  - libpcre3-dev
+  - libtool
+  - automake
+  - autoconf
+  - python-dev
+  - libssl-dev
+  - libjansson-dev
+  - libmagic-dev
+  - build-essential
+
+volatility_version: "2.5"
