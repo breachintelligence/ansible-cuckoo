@@ -9,11 +9,16 @@ This playbook was inspired by [ezetze's ansible-cuckoo](https://github.com/ezete
 
 The playbook is tested on **Ubuntu 14.04 x64**.  **CentOS 7 w/ SELinux Enforcing** support coming soon.
 
-Uses Ansible playbook structure with three distinct roles:
+Currently uses Ansible playbook structure with two distinct roles:
 
 -	**Cuckoo**: This role downloads cuckoo version 2.0-rc1 from official github repository and installs required dependencies. 
--	**Virtualbox**: This role adds the official virtualbox ppa repository for Ubuntu and installs virtualbox. 
--	**Web**: This role configures  nginx  web server and gunicorn  in order to serve the cuckoo web application.
+-	**Virtualbox**: This role adds the official virtualbox ppa repository for Ubuntu and installs virtualbox.
+
+Additional roles being developed:
+
+-	**KVM**: This role installs and configures KVM.
+-	**Postgres**: This role installs and configures PostgreSQL.
+-	**Cuckoo-VPN**: This role configures Cuckoo's Per-Analysis Network Routing.
 
 To install cuckoo on a local Ubuntu 14.04 LTS virtual machine clone this repo and issue the following commands:
 
