@@ -1,0 +1,5 @@
+[program:cuckoo]
+command = /home/cuckoo/cuckoo-{{ cuckoo_version }}/web/gunicorn_start.sh
+user = cuckoo
+stdout_logfile = /var/log/supervisor/cuckoo.log
+redirect_stderr = true

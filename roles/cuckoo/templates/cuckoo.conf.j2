@@ -1,0 +1,43 @@
+[cuckoo]
+version_check = on
+delete_original = off
+delete_bin_copy = off
+machinery = virtualbox
+memory_dump = off
+terminate_processes = off
+reschedule = off
+process_results = on
+max_analysis_count = 0
+max_machines_count = 0
+max_vmstartup_count = 10
+freespace = 64
+tmppath = /tmp
+rooter = /tmp/cuckoo-rooter
+
+[routing]
+route = none
+internet = none
+
+[resultserver]
+ip = 192.168.57.1
+port = 2042
+upload_max_size = 10485760
+
+[processing]
+analysis_size_limit = 104857600
+resolve_dns = on
+sort_pcap = on
+
+[database]
+# Examples, see documentation for more:
+# sqlite:///foo.db
+# postgresql://foo:bar@localhost:5432/mydatabase
+# mysql://foo:bar@localhost/mydatabase
+# If empty, default is a SQLite in db/cuckoo.db.
+connection = sqlite:///cuckoo.db
+timeout =
+
+[timeouts]
+default = 120
+critical = 600
+vm_state = 60

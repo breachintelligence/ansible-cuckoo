@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: "Blair Gillam"
+  company: "Breach Intelligence, Inc."
+  license: MIT
+  min_ansible_version: 2.0
+  platforms:
+#   - name: EL
+#     versions:
+#      - 7
+   - name: Ubuntu
+     versions:
+#      - precise
+#      - quantal
+#      - raring
+#      - saucy
+      - trusty
+  categories:
+   - system
+dependencies: []
+
